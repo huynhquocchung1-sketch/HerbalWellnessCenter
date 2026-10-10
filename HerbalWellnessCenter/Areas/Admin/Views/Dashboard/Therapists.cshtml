@@ -1,0 +1,395 @@
+﻿@model IEnumerable<HerbalWellnessCenter.Models.Therapist>
+
+@{
+    ViewData["Title"] = "Quản Lý Kỹ Thuật Viên - Herbal Wellness Center";
+    int totalTherapists = Model.Count();
+    int availableCount = Model.Count(t => t.IsAvailable);
+    int busyCount = totalTherapists - availableCount;
+}
+
+<!-- TẢI ĐẦY ĐỦ THƯ VIỆN CSS & JS CAO CẤP -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .admin-wrapper {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        padding: 40px 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .header-title {
+        font-family: 'Playfair Display', serif;
+        color: #1e3a1b;
+        letter-spacing: -0.5px;
+    }
+
+    .card-custom {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        background: #ffffff;
+        transition: all 0.3s ease;
+    }
+
+    .kpi-card {
+        border-radius: 16px;
+        padding: 24px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .kpi-card::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+
+    .kpi-total { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+    .kpi-available { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
+    .kpi-occupied { background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); }
+
+    .table-custom th {
+        background-color: #1e3a1b !important;
+        color: white !important;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 16px 20px;
+        border: none;
+        font-weight: 600;
+    }
+
+    .table-custom td {
+        padding: 16px 20px;
+        vertical-align: middle;
+        color: #1f2937;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.92rem;
+    }
+
+    .table-custom tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .btn-success-custom {
+        background-color: #1e3a1b;
+        color: white;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-success-custom:hover {
+        background-color: #2c5228;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(30, 58, 27, 0.2);
+    }
+
+    .search-box {
+        position: relative;
+    }
+    .search-box .bi-search {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    .search-box input {
+        padding-left: 42px;
+        border-radius: 50px;
+        border: 1px solid #e2e8f0;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="container-fluid px-4" style="max-width: 1500px;">
+
+        <!-- HEADER TIÊU ĐỀ & NÚT TÁC VỤ -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-3">
+            <div>
+                <h2 class="fw-bold header-title mb-1 fs-3">
+                    <i class="bi bi-people-fill text-success me-2"></i> QUẢN LÝ KỸ THUẬT VIÊN (THERAPISTS)
+                </h2>
+                <p class="text-muted mb-0 small">Hệ thống quản lý nhân sự dưỡng sinh & phân công trị liệu chuẩn 5 sao • Herbal Wellness Center</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary fw-semibold px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Điều Phối Đơn Hàng
+                </a>
+                <button type="button" class="btn btn-success-custom fw-bold px-4 py-2 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addTherapistModal">
+                    <i class="bi bi-person-plus-fill me-2"></i> Thêm Kỹ Thuật Viên Mới
+                </button>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO HỆ THỐNG -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4 py-3" role="alert">
+                <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i> <span class="align-middle">@TempData["SuccessMessage"]</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4 py-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i> <span class="align-middle">@TempData["ErrorMessage"]</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- 1. KHỐI THỐNG KÊ KPI NHÂN SỰ -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="kpi-card kpi-total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Tổng Số Kỹ Thuật Viên</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@totalTherapists</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-people fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card kpi-available">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Sẵn Sàng Nhận Lịch</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@availableCount</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-person-check-fill fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="kpi-card kpi-occupied">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Đang Phục Vụ (Bận)</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@busyCount</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-person-workspace fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. THANH TÌM KIẾM & LỌC NHANH -->
+        <div class="card card-custom p-3 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="searchInput" class="form-control form-control-lg fs-6 shadow-sm" placeholder="Nhập tên KTV, số điện thoại hoặc chuyên môn để tra cứu...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="statusFilter" class="form-select form-select-lg fs-6 shadow-sm rounded-pill">
+                        <option value="">-- Tất cả trạng thái nhân sự --</option>
+                        <option value="available">Sẵn sàng nhận lịch</option>
+                        <option value="busy">Đang phục vụ</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-light border w-100 py-2 rounded-pill fw-semibold text-secondary shadow-sm" onclick="resetFilter()">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Đặt lại
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. BẢNG DANH SÁCH KỸ THUẬT VIÊN -->
+        <div class="card card-custom overflow-hidden">
+            <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-table text-success me-2"></i> Danh Sách Kỹ Thuật Viên Trị Liệu</h5>
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 fw-bold rounded-pill">Tổng hiển thị: @totalTherapists nhân sự</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom align-middle" id="therapistsTable">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Mã KTV</th>
+                            <th>Họ và Tên Nhân Sự</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Chuyên Môn Trị Liệu</th>
+                            <th>Kinh Nghiệm</th>
+                            <th class="text-center">Trạng Thái Vận Hành</th>
+                            <th class="text-end pe-4">Thao Tác Quản Trị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    Chưa có kỹ thuật viên nào trong hệ thống.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var t in Model)
+                            {
+                                <tr data-status="@(t.IsAvailable ? "available" : "busy")">
+                                    <td class="ps-4 fw-bold text-success font-monospace">#KT-@t.Id</td>
+                                    <td>
+                                        <div class="fw-bold text-dark"><i class="bi bi-person-fill text-success me-2"></i>@t.Name</div>
+                                    </td>
+                                    <td>
+                                        <a href="tel:@t.PhoneNumber" class="text-dark fw-bold text-decoration-none"><i class="bi bi-telephone-fill text-muted me-1 small"></i> @t.PhoneNumber</a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-3 py-2 fw-medium rounded-pill">@t.Specialty</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold text-secondary">@t.YearsOfExperience năm</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (t.IsAvailable)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-bold">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Sẵn sàng nhận lịch
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill fw-bold">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Đang phục vụ
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold shadow-sm" title="Chi tiết & cấu hình">
+                                            <i class="bi bi-sliders me-1"></i> Cấu hình
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL THÊM KỸ THUẬT VIÊN MỚI -->
+<div class="modal fade" id="addTherapistModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <form action="/Admin/Dashboard/AddTherapist" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white px-4 py-3 rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Thêm Hồ Sơ Kỹ Thuật Viên Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-success small">Họ và Tên Kỹ Thuật Viên:</label>
+                        <input type="text" name="name" class="form-control form-control-lg rounded-3 fs-6" required placeholder="Ví dụ: Nguyễn Thị Mai" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-success small">Số Điện Thoại Liên Hệ:</label>
+                            <input type="text" name="phoneNumber" class="form-control form-control-lg rounded-3 fs-6" required placeholder="Ví dụ: 0901234567" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-success small">Email Liên Lạc:</label>
+                            <input type="email" name="email" class="form-control form-control-lg rounded-3 fs-6" placeholder="nhansu@herbalwellness.vn" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-success small">Chuyên Môn Trị Liệu Chính:</label>
+                        <select name="specialty" class="form-select form-select-lg rounded-3 fs-6 shadow-sm" required>
+                            <option value="">-- Chọn chuyên môn thế mạnh --</option>
+                            <option value="Massage Đông Y & Cổ Vai Gáy">Massage Đông Y & Cổ Vai Gáy</option>
+                            <option value="Ngâm Thảo Dược & Xông Hơi Trị Liệu">Ngâm Thảo Dược & Xông Hơi Trị Liệu</option>
+                            <option value="Massage Thụy Điển & Đá Nóng Himalaya">Massage Thụy Điển & Đá Nóng Himalaya</option>
+                            <option value="Dưỡng Sinh Da Đầu & Gội Thảo Dược">Dưỡng Sinh Da Đầu & Gội Thảo Dược</option>
+                            <option value="Châm Cứu & Bấm Huyệt Chuyên Sâu">Châm Cứu & Bấm Huyệt Chuyên Sâu</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-success small">Số Năm Kinh Nghiệm:</label>
+                            <input type="number" name="yearsOfExperience" class="form-control form-control-lg rounded-3 fs-6" value="3" min="0" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-success small">Đánh Giá Ban Đầu (Sao):</label>
+                            <input type="number" step="0.1" name="rating" class="form-control form-control-lg rounded-3 fs-6" value="5.0" min="1" max="5" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light px-4 py-3 rounded-bottom-4">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-success-custom rounded-pill px-5 fw-bold shadow-sm">Lưu Nhân Sự</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT TÌM KIẾM VÀ LỌC THỜI GIAN THỰC -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const statusFilter = document.getElementById("statusFilter");
+        const tableRows = document.querySelectorAll("#therapistsTable tbody tr[data-status]");
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedStatus = statusFilter.value;
+
+            tableRows.forEach(row => {
+                const textContent = row.innerText.toLowerCase();
+                const rowStatus = row.getAttribute("data-status");
+
+                const matchesSearch = textContent.includes(searchTerm);
+                const matchesStatus = !selectedStatus || rowStatus === selectedStatus;
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener("keyup", filterTable);
+        if (statusFilter) statusFilter.addEventListener("change", filterTable);
+    });
+
+    function resetFilter() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("statusFilter").value = "";
+        const tableRows = document.querySelectorAll("#therapistsTable tbody tr[data-status]");
+        tableRows.forEach(row => row.style.display = "");
+    }
+</script>

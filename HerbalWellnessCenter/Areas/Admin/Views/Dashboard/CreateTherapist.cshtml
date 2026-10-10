@@ -1,0 +1,160 @@
+﻿@model HerbalWellnessCenter.Models.Therapist
+
+@{
+    ViewData["Title"] = "Thêm Kỹ Thuật Viên Mới - Herbal Wellness Center";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    .admin-wrapper {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        padding: 40px 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .header-title {
+        font-family: 'Playfair Display', serif;
+        color: #1e3a1b;
+        letter-spacing: -0.5px;
+    }
+    .card-custom {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        background: #ffffff;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3a1b;
+        box-shadow: 0 0 0 0.25rem rgba(30, 58, 27, 0.15);
+    }
+    .btn-success-custom {
+        background-color: #1e3a1b;
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-success-custom:hover {
+        background-color: #2c5228;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(30, 58, 27, 0.25);
+    }
+    .info-box {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        border-radius: 8px;
+        padding: 16px;
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="container" style="max-width: 950px;">
+        
+        <!-- HEADER TIÊU ĐỀ & ĐIỀU HƯỚNG -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-3">
+            <div>
+                <h2 class="fw-bold header-title mb-1 fs-3">
+                    <i class="bi bi-person-plus-fill text-success me-2"></i> THÊM HỒ SƠ KỸ THUẬT VIÊN MỚI
+                </h2>
+                <p class="text-muted mb-0 small">Đăng ký nhân sự trị liệu, dưỡng sinh & phân công dịch vụ • Herbal Wellness Center</p>
+            </div>
+            <div>
+                <a asp-action="Therapists" class="btn btn-outline-secondary fw-semibold px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Quay Lại Danh Sách
+                </a>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO LỖI MODEL (NẾU CÓ) -->
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> Vui lòng kiểm tra lại thông tin hồ sơ nhân sự bên dưới.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- FORM NHẬP LIỆU CHÍNH -->
+        <div class="card card-custom p-4 p-md-5 mb-4 border-top border-success border-4">
+            <form asp-action="CreateTherapist" method="post" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="info-box mb-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-shield-check-fill text-success fs-4 mt-1"></i>
+                        <div>
+                            <h6 class="fw-bold text-success mb-1">Thông tin quản lý nhân sự chuyên sâu</h6>
+                            <p class="small text-muted mb-0">Hồ sơ kỹ thuật viên sau khi tạo sẽ tự động kích hoạt trạng thái <strong>Sẵn sàng nhận lịch</strong> trên hệ thống điều phối lễ tân.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Họ và Tên Nhân Sự <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-person-fill"></i></span>
+                            <input type="text" asp-for="Name" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" required placeholder="Ví dụ: Nguyễn Thị Mai" />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Số Điện Thoại Liên Hệ <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-telephone-fill"></i></span>
+                            <input type="text" asp-for="PhoneNumber" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" required placeholder="Ví dụ: 0901234567" />
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Địa Chỉ Email (Hệ thống / Thông báo)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-envelope-fill"></i></span>
+                            <input type="email" asp-for="Email" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" placeholder="Ví dụ: nhanvien@herbalwellness.vn" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Chuyên Môn Trị Liệu Chính <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-award-fill"></i></span>
+                            <input type="text" asp-for="Specialty" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" value="Massage Đông Y & Cổ Vai Gáy" required placeholder="Ví dụ: Massage Đông Y" />
+                        </div>
+                        <span asp-validation-for="Specialty" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Số Năm Kinh Nghiệm <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-clock-history"></i></span>
+                            <input type="number" asp-for="YearsOfExperience" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" value="3" min="0" max="40" required />
+                        </div>
+                        <span asp-validation-for="YearsOfExperience" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success small text-uppercase">Điểm Đánh Giá Ban Đầu (Sao) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-warning"><i class="bi bi-star-fill"></i></span>
+                            <input type="number" step="0.1" asp-for="Rating" class="form-control form-control-lg rounded-end-3 fs-6 border-start-0" value="5.0" min="1.0" max="5.0" required />
+                        </div>
+                        <span asp-validation-for="Rating" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                </div>
+
+                <!-- NÚT HÀNH ĐỘNG -->
+                <div class="d-flex justify-content-end align-items-center gap-3 pt-4 mt-4 border-top">
+                    <a asp-action="Therapists" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-success-custom fw-bold px-5 py-3 rounded-pill shadow-sm">
+                        <i class="bi bi-person-check-fill me-2 fs-5 align-middle"></i> Lưu Hồ Sơ Nhân Sự
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

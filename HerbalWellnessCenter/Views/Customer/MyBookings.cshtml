@@ -1,0 +1,325 @@
+﻿@model IEnumerable<HerbalWellnessCenter.Models.Booking>
+
+@{
+    ViewData["Title"] = "Lịch Hẹn Của Tôi - Herbal Wellness Center";
+    string currentFilter = ViewData["CurrentFilter"]?.ToString() ?? "All";
+
+    // Thống kê nhanh
+    int totalBookings = Model.Count();
+    int pendingBookings = Model.Count(b => b.Status == "Chờ xác nhận");
+    int confirmedBookings = Model.Count(b => b.Status == "Đã cọc");
+    int completedBookings = Model.Count(b => b.Status == "Hoàn thành");
+}
+
+<style>
+    :root {
+        --primary-green: #1e3a1b;
+        --accent-gold: #c5a059;
+        --soft-bg: #fbf9f5;
+    }
+
+    body {
+        background-color: var(--soft-bg);
+    }
+
+    .font-serif {
+        font-family: 'Playfair Display', Georgia, serif;
+    }
+
+    .booking-card {
+        transition: all 0.3s ease;
+        border-radius: 16px;
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .booking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(30, 58, 27, 0.08) !important;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 50rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .nav-pills-custom .nav-link {
+        color: #4b5563;
+        font-weight: 600;
+        border-radius: 50rem;
+        padding: 0.5rem 1.25rem;
+        transition: all 0.25s ease;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-pills-custom .nav-link.active {
+        background-color: var(--primary-green) !important;
+        color: #ffffff !important;
+        border-color: var(--primary-green) !important;
+        box-shadow: 0 4px 12px rgba(30, 58, 27, 0.2);
+    }
+
+    .qr-modal-card {
+        background: linear-gradient(135deg, #1e3a1b 0%, #0f210e 100%);
+        color: #ffffff;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="container py-5" style="min-height: 85vh;">
+
+    <!-- HIỂN THỊ THÔNG BÁO TEMP DATA -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- HEADER TRANG -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom">
+        <div>
+            <h2 class="fw-bold font-serif mb-1" style="color: var(--primary-green);">
+                <i class="bi bi-journal-bookmark-fill me-2" style="color: var(--accent-gold);"></i> Quản Lý Lịch Hẹn Trải Nghiệm
+            </h2>
+            <p class="text-muted small mb-0">Theo dõi lịch trình phục hồi Thân – Tâm – Trí của bạn tại Herbal Wellness Center.</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a asp-controller="Home" asp-action="Index" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: var(--primary-green);">
+                <i class="bi bi-calendar-plus me-1"></i> Đặt Lịch Trải Nghiệm Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- THẺ THỐNG KÊ NHANH -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="bg-white p-3 rounded-4 border shadow-sm text-center">
+                <span class="text-muted small d-block mb-1 fw-bold">TỔNG PHIẾU HẸN</span>
+                <span class="fs-4 fw-bold" style="color: var(--primary-green);">@totalBookings</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white p-3 rounded-4 border shadow-sm text-center">
+                <span class="text-warning small d-block mb-1 fw-bold">CHỜ CỌC GIỮ CHỖ</span>
+                <span class="fs-4 fw-bold text-warning">@pendingBookings</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white p-3 rounded-4 border shadow-sm text-center">
+                <span class="text-success small d-block mb-1 fw-bold">ĐÃ XÁC NHẬN CỌC</span>
+                <span class="fs-4 fw-bold text-success">@confirmedBookings</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white p-3 rounded-4 border shadow-sm text-center">
+                <span class="text-info small d-block mb-1 fw-bold">ĐÃ HOÀN THÀNH</span>
+                <span class="fs-4 fw-bold text-info">@completedBookings</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC TAB TRẠNG THÁI -->
+    <div class="d-flex flex-wrap nav-pills-custom mb-4">
+        <a asp-action="MyBookings" asp-route-statusFilter="All" class="nav-link @(currentFilter == "All" ? "active" : "")">
+            Tất cả (@totalBookings)
+        </a>
+        <a asp-action="MyBookings" asp-route-statusFilter="Chờ xác nhận" class="nav-link @(currentFilter == "Chờ xác nhận" ? "active" : "")">
+            Chờ xác nhận (@pendingBookings)
+        </a>
+        <a asp-action="MyBookings" asp-route-statusFilter="Đã cọc" class="nav-link @(currentFilter == "Đã cọc" ? "active" : "")">
+            Đã đặt cọc (@confirmedBookings)
+        </a>
+        <a asp-action="MyBookings" asp-route-statusFilter="Hoàn thành" class="nav-link @(currentFilter == "Hoàn thành" ? "active" : "")">
+            Hoàn thành (@completedBookings)
+        </a>
+        <a asp-action="MyBookings" asp-route-statusFilter="Đã hủy" class="nav-link @(currentFilter == "Đã hủy" ? "active" : "")">
+            Đã hủy
+        </a>
+    </div>
+
+    <!-- DANH SÁCH LỊCH HẸN -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm border p-5">
+            <div class="mb-3">
+                <i class="bi bi-calendar2-x fs-1 text-muted opacity-50"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Không tìm thấy lịch hẹn nào</h5>
+            <p class="text-muted small mb-3">Bạn chưa có lịch hẹn nào thuộc trạng thái lựa chọn này.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn rounded-pill text-white px-4 py-2 fw-bold" style="background-color: var(--primary-green);">
+                Đặt Lịch Ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                decimal depositAmount = item.NumberOfGuests * 100000;
+                string qrUrl = $"https://img.vietqr.io/image/TCB-19036836868011-compact2.png?amount={depositAmount}&addInfo=HERBAL{item.Id}&accountName=HUYNH%20QUOC%20CHUNG";
+
+                <div class="col-lg-6">
+                    <div class="card booking-card shadow-sm h-100 overflow-hidden" style="border-left: 5px solid var(--primary-green) !important;">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <!-- HEADER THẺ LỊCH HẸN -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="fw-bold px-3 py-1 bg-light text-dark rounded-pill border small">
+                                        #HERBAL-@item.Id
+                                    </span>
+
+                                    @if (item.Status == "Chờ xác nhận")
+                                    {
+                                        <span class="status-badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                            <i class="bi bi-clock-history me-1"></i> Chờ Xác Nhận & Cọc
+                                        </span>
+                                    }
+                                    else if (item.Status == "Đã cọc")
+                                    {
+                                        <span class="status-badge bg-success bg-opacity-10 text-success border border-success">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Đã Đặt Cọc Giữ Chỗ
+                                        </span>
+                                    }
+                                    else if (item.Status == "Hoàn thành")
+                                    {
+                                        <span class="status-badge bg-info bg-opacity-10 text-info border border-info">
+                                            <i class="bi bi-stars me-1"></i> Đã Hoàn Thành
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge bg-secondary bg-opacity-10 text-secondary border border-secondary">
+                                            <i class="bi bi-x-circle me-1"></i> Đã Hủy
+                                        </span>
+                                    }
+                                </div>
+
+                                <!-- THỜI GIAN & THÔNG TIN CHÍNH -->
+                                <h5 class="fw-bold mb-3" style="color: var(--primary-green);">
+                                    <i class="bi bi-calendar-event me-2" style="color: var(--accent-gold);"></i>
+                                    @item.BookingDate.ToString("dd/MM/yyyy") lúc @item.BookingTime.ToString(@"hh\:mm")
+                                </h5>
+
+                                <div class="bg-light p-3 rounded-3 mb-3 border-0">
+                                    <div class="row g-2 small text-muted">
+                                        <div class="col-6">
+                                            <i class="bi bi-person me-1 text-success"></i> Khách hàng: <strong class="text-dark">@item.CustomerName</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="bi bi-telephone me-1 text-success"></i> SĐT: <strong class="text-dark">@item.PhoneNumber</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="bi bi-people me-1 text-success"></i> Số lượng: <strong class="text-dark">@item.NumberOfGuests Khách</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <i class="bi bi-wallet2 me-1 text-success"></i> Tiền cọc: <strong class="text-danger">@depositAmount.ToString("N0")đ</strong>
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.Note))
+                                    {
+                                        <div class="mt-2 pt-2 border-top x-small text-muted" style="font-size: 12px;">
+                                            <i class="bi bi-chat-left-text me-1"></i> Ghi chú: <em>@item.Note</em>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- THAO TÁC NÚT BẤM -->
+                            <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                                @if (item.Status == "Chờ xác nhận")
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#qrModal-@item.Id">
+                                        <i class="bi bi-qr-code-scan me-1"></i> Quét QR Thanh Toán Cọc
+                                    </button>
+
+                                    <button type="button" class="btn btn-sm btn-link text-danger text-decoration-none small" data-bs-toggle="modal" data-bs-target="#cancelModal-@item.Id">
+                                        <i class="bi bi-trash me-1"></i> Hủy Hẹn
+                                    </button>
+                                }
+                                else if (item.Status == "Đã cọc")
+                                {
+                                    <span class="small text-success fw-bold"><i class="bi bi-shield-check me-1"></i> Giữ chỗ thành công. Hẹn gặp bạn!</span>
+                                }
+                                else if (item.Status == "Hoàn thành")
+                                {
+                                    <span class="small text-muted"><i class="bi bi-heart-fill text-danger me-1"></i> Cảm ơn bạn đã trải nghiệm dịch vụ</span>
+                                }
+                                else
+                                {
+                                    <span class="small text-muted">Phiếu đặt lịch đã bị hủy</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL HIỂN THỊ VIETQR THANH TOÁN CỌC -->
+                <div class="modal fade" id="qrModal-@item.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content qr-modal-card p-3 border-0 shadow-lg text-center">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title font-serif fw-bold" style="color: var(--accent-gold);">Thanh Toán Cọc Giữ Chỗ</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small text-white-50 mb-2">Quét mã VietQR bằng ứng dụng ngân hàng bất kỳ để tự động duyệt cọc.</p>
+                                <div class="bg-white p-3 rounded-4 d-inline-block shadow mb-3">
+                                    <img src="@qrUrl" alt="VietQR" class="img-fluid" style="max-width: 230px; border-radius: 12px;" />
+                                </div>
+                                <div class="bg-black bg-opacity-25 p-3 rounded-3 text-start small">
+                                    <p class="mb-1"><strong>Số tiền cọc:</strong> <span class="text-warning fw-bold fs-6">@depositAmount.ToString("N0") VNĐ</span></p>
+                                    <p class="mb-1"><strong>Nội dung CK:</strong> <span class="badge bg-warning text-dark font-monospace">HERBAL@item.Id</span></p>
+                                    <p class="mb-0 text-white-50 x-small">* Vui lòng giữ nguyên nội dung chuyển khoản để hệ thống ghi nhận ngay lập tức.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL XÁC NHẬN HỦY LỊCH HẸN -->
+                <div class="modal fade" id="cancelModal-@item.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow">
+                            <form asp-action="CancelBooking" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <div class="modal-header border-bottom-0">
+                                    <h5 class="modal-title fw-bold text-danger">Xác Nhận Hủy Lịch Hẹn #HERBAL-@item.Id</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-start">
+                                    <p class="small text-muted mb-3">Bạn có chắc chắn muốn hủy phiếu đặt lịch này không? Thao tác này không thể hoàn tác.</p>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Lý do hủy (Không bắt buộc):</label>
+                                        <textarea name="cancelReason" class="form-control rounded-3" rows="2" placeholder="VD: Đột xuất có lịch bận..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-top-0">
+                                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Xác Nhận Hủy</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,362 @@
+﻿@model HerbalWellnessCenter.Models.Booking
+
+@{
+    ViewData["Title"] = "Xác Nhận Đặt Lịch Hẹn - Herbal Wellness Center";
+    var depositAmount = ViewBag.DepositAmount ?? (Model.NumberOfGuests * 100000);
+    var bankName = ViewBag.BankName ?? "Techcombank";
+    var accountName = ViewBag.AccountName ?? "HUYNH QUOC CHUNG";
+    var accountNo = ViewBag.AccountNo ?? "74868699999";
+}
+
+<style>
+    /* -------------------------------------------------------------
+       1. GIAO DIỆN MÀN HÌNH (SCREEN DISPLAY)
+    ------------------------------------------------------------- */
+    :root {
+        --brand-green: #1e3a1b;
+        --brand-gold: #c5a059;
+    }
+
+    .confirmation-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .confirmation-header {
+        background: linear-gradient(135deg, #1e3a1b 0%, #2d5a27 100%);
+        color: white;
+        padding: 35px 25px;
+        text-align: center;
+        position: relative;
+    }
+
+    .check-icon-circle {
+        width: 70px;
+        height: 70px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border: 2px solid var(--brand-gold);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: var(--brand-gold);
+        font-size: 2.2rem;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .qr-box {
+        background: #fbf9f5;
+        border: 2px dashed var(--brand-gold);
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .copy-btn {
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+        background-color: #e2e8f0;
+        color: var(--brand-green) !important;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        background-color: var(--brand-green);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+
+    /* -------------------------------------------------------------
+       2. BỘ TỐI ƯU HÓA KHI IN PHIẾU (PRINT CSS - TRỌN TRONG 1 TRANG A4)
+    ------------------------------------------------------------- */
+    @@media print {
+        /* Ẩn tất cả phần thừa trên web (Header, Footer, Menu, Nút bấm) */
+        header, footer, nav, .no-print, .btn, .alert {
+            display: none !important;
+        }
+
+        body {
+            background: #ffffff !important;
+            font-family: 'Times New Roman', Times, serif;
+            color: #000000 !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .confirmation-card {
+            box-shadow: none !important;
+            border: 2px solid #1e3a1b !important;
+            border-radius: 0 !important;
+            page-break-inside: avoid;
+        }
+
+        .confirmation-header {
+            background: #1e3a1b !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            padding: 20px !important;
+        }
+
+        .confirmation-header h2, .confirmation-header p, .confirmation-header span {
+            color: #ffffff !important;
+        }
+
+        .check-icon-circle {
+            display: none !important; /* Ẩn icon tròn khi in */
+        }
+
+        /* Hiển thị con dấu đỏ xác nhận thương hiệu */
+        .print-seal {
+            display: block !important;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            border: 3px double #d9534f;
+            color: #d9534f;
+            font-weight: bold;
+            padding: 8px 15px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            transform: rotate(-5deg);
+            border-radius: 8px;
+            letter-spacing: 1px;
+        }
+
+        .qr-box {
+            border: 1px solid #999 !important;
+            background: #fff !important;
+            padding: 10px !important;
+        }
+
+        .copy-btn {
+            display: none !important;
+        }
+
+        .print-footer-signature {
+            display: flex !important;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+        }
+
+        @@page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+    }
+
+    .print-seal, .print-footer-signature {
+        display: none; /* Mặc định ẩn trên web */
+    }
+</style>
+
+<div class="container my-4 my-md-5 py-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="confirmation-card position-relative">
+                
+                <!-- CON DẤU XÁC NHẬN CHỈ HIỂN THỊ KHI IN -->
+                <div class="print-seal">
+                    ✓ ĐÃ XÁC NHẬN GIỮ CHỖ
+                </div>
+
+                <!-- 1. HEADER PHIẾU HẸN -->
+                <div class="confirmation-header">
+                    <div class="check-icon-circle no-print">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <h3 class="fw-bold text-uppercase mb-1" style="letter-spacing: 2px;">HERBAL WELLNESS CENTER</h3>
+                    <p class="small text-white-50 mb-2">Trung Tâm Trị Liệu Đông Y Dưỡng Sinh Cổ Truyền</p>
+                    <div class="d-inline-block bg-warning text-dark px-3 py-1 rounded-pill fw-bold text-uppercase fs-6">
+                        PHIẾU XÁC NHẬN ĐẶT LỊCH HẸN
+                    </div>
+                    <p class="mt-2 mb-0 text-white-50 small">Mã tra cứu phiếu: <strong class="text-warning fs-6">#HERBAL-@Model.Id</strong> | Ngày lập: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <!-- Thông báo trạng thái trên web -->
+                    <div class="alert alert-success d-flex align-items-center gap-3 rounded-3 mb-4 border-0 shadow-sm no-print">
+                        <i class="bi bi-bell-ring-fill fs-3 text-success"></i>
+                        <div>
+                            <strong>Yêu cầu giữ chỗ đã được ghi nhận thành công!</strong>
+                            <div class="small">Lễ tân trung tâm sẽ gọi điện xác nhận trong vòng 15 phút qua SĐT: <strong>@Model.PhoneNumber</strong>.</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- 2. THÔNG TIN KHÁCH HÀNG & LỊCH HẸN -->
+                        <div class="col-md-7">
+                            <h5 class="fw-bold text-success border-bottom pb-2 mb-3">
+                                <i class="bi bi-person-badge me-2 no-print"></i>CHI TIẾT PHIẾU HẸN
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="info-label">Họ và tên khách hàng</div>
+                                    <div class="info-value">@Model.CustomerName</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Số điện thoại</div>
+                                    <div class="info-value">@Model.PhoneNumber</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Ngày trải nghiệm</div>
+                                    <div class="info-value text-success"><i class="bi bi-calendar3 me-1 no-print"></i>@Model.BookingDate.ToString("dd/MM/yyyy")</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Khung giờ đón</div>
+                                    <div class="info-value text-success"><i class="bi bi-clock me-1 no-print"></i>@Model.BookingTime.ToString(@"hh\:mm")</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Số lượng khách</div>
+                                    <div class="info-value">@Model.NumberOfGuests Người</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Trạng thái phiếu</div>
+                                    <span class="badge bg-warning text-dark px-2 py-1">@Model.Status</span>
+                                </div>
+                                <div class="col-12">
+                                    <div class="info-label">Dịch vụ / Ghi chú đặt chỗ</div>
+                                    <div class="bg-light p-2 rounded small mt-1 border">
+                                        @(string.IsNullOrEmpty(Model.Note) ? "Dịch vụ Dưỡng sinh Tổng hợp." : Model.Note)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. MÃ VIETQR ĐẶT CỌC & TÀI KHOẢN -->
+                        <div class="col-md-5">
+                            <div class="qr-box text-center h-100 d-flex flex-column justify-content-center">
+                                <span class="badge bg-success text-white mb-2 px-3 align-self-center no-print">TỰ ĐỘNG GIỮ CHỖ</span>
+                                <h6 class="fw-bold text-dark mb-1">MÃ VIETQR ĐẶT CỌC GIỮ CHỖ</h6>
+                                <p class="small text-muted mb-2">Mức cọc củng cố: <strong class="text-danger">@String.Format("{0:N0}", depositAmount) VNĐ</strong></p>
+
+                                <div class="bg-white p-2 d-inline-block rounded-3 shadow-sm mx-auto mb-2">
+                                    <img src="@ViewBag.QrCodeUrl" alt="VietQR Pay" class="img-fluid" style="max-width: 180px;" />
+                                </div>
+
+                                <div class="small text-start bg-white p-2 rounded border">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">Ngân hàng:</span>
+                                        <strong>@bankName</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">Chủ tài khoản:</span>
+                                        <strong class="text-dark">@accountName</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-muted">Số tài khoản:</span>
+                                        <span class="fw-bold text-dark">
+                                            @accountNo 
+                                            <i class="bi bi-copy copy-btn text-primary ms-1 no-print" onclick="copyText('@accountNo', 'Đã sao chép số tài khoản!')"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Nội dung CK:</span>
+                                        <span class="fw-bold text-danger">
+                                            COC LICH HEN @Model.Id 
+                                            <i class="bi bi-copy copy-btn text-primary ms-1 no-print" onclick="copyText('COC LICH HEN @Model.Id', 'Đã sao chép nội dung chuyển khoản!')"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. QUY TRÌNH TRẢI NGHIỆM -->
+                    <div class="bg-light p-3 rounded-3 mb-4 border">
+                        <h6 class="fw-bold text-success text-uppercase mb-2">Lưu ý khi đến trải nghiệm</h6>
+                        <div class="row g-2 small text-muted">
+                            <div class="col-md-4">1. Quý khách vui lòng đến trước <strong>10 phút</strong> để thưởng trà dưỡng sinh.</div>
+                            <div class="col-md-4">2. Tiền đặt cọc sẽ được <strong>khấu trừ trực tiếp</strong> vào hóa đơn thực tế.</div>
+                            <div class="col-md-4">3. Vui lòng xuất trình mã phiếu <strong>#HERBAL-@Model.Id</strong> cho lễ tân.</div>
+                        </div>
+                    </div>
+
+                    <!-- 5. CHỮ KÝ XÁC NHẬN CHỈ HIỂN THỊ KHI IN A4 -->
+                    <div class="print-footer-signature">
+                        <div>
+                            <p class="mb-1 fw-bold">Khách Hàng</p>
+                            <p class="small text-muted">(Ký & ghi rõ họ tên)</p>
+                            <br /><br />
+                            <p class="fw-bold">@Model.CustomerName</p>
+                        </div>
+                        <div>
+                            <p class="mb-1 fw-bold">Đại Diện Herbal Wellness Center</p>
+                            <p class="small text-muted">(Ký, đóng dấu & xác nhận)</p>
+                            <br /><br />
+                            <p class="fw-bold">Lễ Tân Xác Nhận</p>
+                        </div>
+                    </div>
+
+                    <!-- 6. NÚT THAO TÁC (ẨN HOÀN TOÀN KHI IN) -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 no-print mt-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-success rounded-pill px-4 py-2 font-weight-bold">
+                            <i class="bi bi-house-door me-1"></i> Trang chủ
+                        </a>
+                        <button onclick="window.print()" class="btn btn-success rounded-pill px-4 py-2 font-weight-bold shadow">
+                            <i class="bi bi-printer me-1"></i> In phiếu hẹn A4
+                        </button>
+                        <a href="tel:0901234567" class="btn btn-warning text-dark rounded-pill px-4 py-2 font-weight-bold">
+                            <i class="bi bi-telephone-fill me-1"></i> Gọi hỗ trợ khẩn cấp
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script Copy Text -->
+<script>
+    function copyText(text, message) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert(message);
+        }).catch(function() {
+            var tempInput = document.createElement("input");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert(message);
+        });
+    }
+</script>

@@ -1,0 +1,500 @@
+﻿@model IEnumerable<HerbalWellnessCenter.Models.Booking>
+
+@{
+    ViewData["Title"] = "Quản Trị Lễ Tân & Điều Phối - Herbal Wellness Center";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalItems = ViewBag.TotalItems ?? 0;
+
+    var therapists = ViewBag.Therapists as IEnumerable<HerbalWellnessCenter.Models.Therapist> ?? new List<HerbalWellnessCenter.Models.Therapist>();
+    var beds = ViewBag.Beds as IEnumerable<HerbalWellnessCenter.Models.Bed> ?? new List<HerbalWellnessCenter.Models.Bed>();
+}
+
+<!-- NẠP TRỰC TIẾP TOÀN BỘ THƯ VIỆN CSS VÀ BOOTSTRAP 5 CHỐNG LỆCH GIAO DIỆN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .admin-wrapper {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        padding: 35px 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .admin-header-title {
+        font-family: 'Playfair Display', serif;
+        color: #1e3a1b;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        background: #ffffff;
+        transition: all 0.3s ease;
+    }
+
+    /* KPI Cards Styling */
+    .kpi-box {
+        border-radius: 16px;
+        padding: 24px;
+        color: white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .kpi-box:hover {
+        transform: translateY(-4px);
+    }
+
+    .kpi-box::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+
+    .kpi-total { background: linear-gradient(135deg, #1e3a8a 100%, #3b82f6 0%); }
+    .kpi-pending { background: linear-gradient(135deg, #d97706 100%, #fbbf24 0%); }
+    .kpi-deposit { background: linear-gradient(135deg, #065f46 100%, #10b981 0%); }
+    .kpi-revenue { 
+        background: linear-gradient(135deg, #1e3a1b 100%, #2d5a27 0%); 
+        color: #ffd700;
+    }
+
+    /* Custom Table Styling */
+    .table-custom th {
+        background-color: #1e3a1b !important;
+        color: white !important;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 16px 14px;
+        border: none;
+        font-weight: 600;
+    }
+
+    .table-custom td {
+        padding: 16px 14px;
+        vertical-align: middle;
+        color: #1f2937;
+        font-size: 0.9rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-deposit { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .badge-completed { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-cancelled { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .btn-success-custom {
+        background-color: #1e3a1b;
+        color: white;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-success-custom:hover {
+        background-color: #2c5228;
+        color: white;
+        box-shadow: 0 4px 12px rgba(30, 58, 27, 0.2);
+    }
+</style>
+
+<div class="admin-wrapper">
+    <div class="container-fluid px-4" style="max-width: 1650px;">
+
+        <!-- HEADER TIÊU ĐỀ & TÁC VỤ NHANH -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-3">
+            <div>
+                <h2 class="fw-bold admin-header-title mb-1 fs-3">
+                    <i class="bi bi-speedometer2 text-success me-2"></i> QUẢN TRỊ LỄ TÂN & ĐIỀU PHỐI VẬN HÀNH
+                </h2>
+                <p class="text-muted mb-0 small">Hệ thống kiểm soát không gian & thanh toán tự động • Xin chào, <strong class="text-dark">@User.Identity?.Name</strong></p>
+            </div>
+            
+            <!-- CỤM NÚT CHUYỂN TRANG QUẢN LÝ (ĐƯỜNG DẪN TUYỆT ĐỐI CHỐNG LỖI CLICK) -->
+            <div class="d-flex gap-2">
+                <a href="/Admin/Dashboard/Beds" class="btn btn-outline-success fw-semibold px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-door-open-fill me-1"></i> Quản Lý Giường
+                </a>
+                <a href="/Admin/Dashboard/Therapists" class="btn btn-outline-success fw-semibold px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-person-badge me-1"></i> Quản Lý KTV
+                </a>
+                <a href="/Admin/Dashboard/ExportToExcel?status=@ViewBag.CurrentStatus&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate" class="btn btn-success-custom fw-bold px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i> Xuất Báo Cáo CSV
+                </a>
+            </div>
+        </div>
+
+        <!-- THÔNG BÁO HỆ THỐNG -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4 py-3" role="alert">
+                <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i> <span class="align-middle">@TempData["SuccessMessage"]</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4 py-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i> <span class="align-middle">@TempData["ErrorMessage"]</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- 1. KHỐI THỐNG KÊ KPI & DOANH THU THỜI GIAN THỰC -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-box kpi-total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Tổng Đơn Đặt Lịch</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@ViewBag.TotalBookings</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-journal-text fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-box kpi-pending">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Đang Chờ Xác Nhận</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@ViewBag.PendingCount</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-clock-history fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-box kpi-deposit">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-white-50 small text-uppercase fw-bold">Đã Cọc (VietQR)</span>
+                            <h2 class="fw-bold mb-0 mt-2 display-6">@ViewBag.DepositCount</h2>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-qr-code-scan fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="kpi-box kpi-revenue">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-warning small text-uppercase fw-bold">Doanh Thu Dự Kiến</span>
+                            <h3 class="fw-bold mb-0 mt-2">@String.Format("{0:N0}", ViewBag.TotalRevenue ?? 0)đ</h3>
+                        </div>
+                        <div class="p-3 bg-white bg-opacity-10 rounded-circle">
+                            <i class="bi bi-wallet2 fs-2 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. BỘ LỌC TÌM KIẾM DỮ LIỆU NÂNG CAO -->
+        <div class="admin-card p-4 mb-4">
+            <form method="get" action="/Admin/Dashboard/Index" class="row g-3 align-items-center">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted">Tìm kiếm thông tin:</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control border-start-0 py-2" placeholder="Họ tên, SĐT, mã đơn..." />
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label small fw-bold text-muted">Trạng thái:</label>
+                    <select name="status" class="form-select py-2">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="Chờ xác nhận" selected="@(ViewBag.CurrentStatus == "Chờ xác nhận")">Chờ xác nhận</option>
+                        <option value="Đã cọc" selected="@(ViewBag.CurrentStatus == "Đã cọc")">Đã cọc</option>
+                        <option value="Hoàn thành" selected="@(ViewBag.CurrentStatus == "Hoàn thành")">Hoàn thành</option>
+                        <option value="Đã hủy" selected="@(ViewBag.CurrentStatus == "Đã hủy")">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label small fw-bold text-muted">Từ ngày:</label>
+                    <input type="date" name="fromDate" value="@ViewBag.FromDate" class="form-control py-2" />
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label small fw-bold text-muted">Đến ngày:</label>
+                    <input type="date" name="toDate" value="@ViewBag.ToDate" class="form-control py-2" />
+                </div>
+                <div class="col-lg-3 col-md-4 d-flex align-items-end gap-2 pt-2">
+                    <button type="submit" class="btn btn-success-custom w-100 fw-bold py-2 rounded-pill"><i class="bi bi-funnel me-1"></i> Lọc Dữ Liệu</button>
+                    <a href="/Admin/Dashboard/Index" class="btn btn-outline-secondary py-2 px-3 rounded-pill" title="Đặt lại bộ lọc"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. BẢNG DANH SÁCH ĐIỀU PHỐI LỊCH HẸN -->
+        <div class="admin-card overflow-hidden">
+            <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-table text-success me-2"></i> Danh Sách Điều Phối Vận Hành</h5>
+                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 fw-bold rounded-pill">Tổng hiển thị: @Model.Count() / @totalItems bản ghi</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Mã Đơn</th>
+                            <th>Khách Hàng</th>
+                            <th>Dịch Vụ & Thời Gian</th>
+                            <th>Thanh Toán</th>
+                            <th>Kỹ Thuật Viên</th>
+                            <th>Giường / Phòng</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th class="text-end pe-4">Hành Động Điều Phối</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    Không tìm thấy đơn đặt lịch nào phù hợp với bộ lọc.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-success font-monospace">
+                                        #HERBAL-@item.Id
+                                        @if (!string.IsNullOrEmpty(item.TransactionCode))
+                                        {
+                                            <div class="small text-muted font-monospace mt-1" style="font-size: 0.7rem;">Ref: @item.TransactionCode</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">@item.CustomerName</div>
+                                        <a href="tel:@item.PhoneNumber" class="small text-muted text-decoration-none">
+                                            <i class="bi bi-telephone text-success me-1"></i>@item.PhoneNumber
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">@(item.Service?.Title ?? "Dịch vụ Đông Y")</div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>@item.BookingDate.ToString("dd/MM/yyyy")
+                                            <i class="bi bi-clock ms-2 me-1"></i>@item.BookingTime.ToString(@"hh\:mm") (@item.NumberOfGuests khách)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.Status == "Đã cọc" || item.Status == "Hoàn thành")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 fw-bold">
+                                                <i class="bi bi-check-circle me-1"></i> Đã cọc (@item.DepositAmount.ToString("N0"))
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1 fw-bold">
+                                                <i class="bi bi-clock-history me-1"></i> Chưa cọc
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Therapist != null)
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 fw-bold rounded-pill">
+                                                <i class="bi bi-person-fill me-1"></i>@item.Therapist.Name
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small fst-italic"><i class="bi bi-dash-circle me-1"></i> Chưa xếp KTV</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Bed != null)
+                                        {
+                                            <span class="badge bg-info bg-opacity-10 text-dark border border-info px-3 py-2 fw-bold rounded-pill">
+                                                <i class="bi bi-hospital me-1"></i>@item.Bed.BedNumber (@item.Bed.RoomName)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small fst-italic"><i class="bi bi-dash-circle me-1"></i> Chưa xếp giường</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.Status == "Chờ xác nhận") { <span class="badge badge-status badge-pending">Chờ xác nhận</span> }
+                                        else if (item.Status == "Đã cọc") { <span class="badge badge-status badge-deposit">Đã cọc</span> }
+                                        else if (item.Status == "Hoàn thành") { <span class="badge badge-status badge-completed">Hoàn thành</span> }
+                                        else { <span class="badge badge-status badge-cancelled">Đã hủy</span> }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex justify-content-end gap-2 align-items-center">
+                                            <!-- NÚT MỞ MODAL ĐIỀU PHỐI TÀI NGUYÊN -->
+                                            <button type="button" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#assignModal-@item.Id" title="Gán KTV & Giường">
+                                                <i class="bi bi-sliders me-1"></i> Xếp KTV/Giường
+                                            </button>
+
+                                            <!-- NÚT DUYỆT NHANH TRẠNG THÁI -->
+                                            <form action="/Admin/Dashboard/UpdateStatus" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <div class="btn-group btn-group-sm shadow-sm">
+                                                    <button type="submit" name="newStatus" value="Đã cọc" class="btn btn-outline-info fw-semibold" title="Duyệt cọc">Cọc</button>
+                                                    <button type="submit" name="newStatus" value="Hoàn thành" class="btn btn-outline-success fw-semibold" title="Hoàn thành đơn">Xong</button>
+                                                    <button type="submit" name="newStatus" value="Đã hủy" class="btn btn-outline-danger fw-semibold" title="Hủy đơn" onclick="return confirm('Xác nhận HỦY phiếu hẹn #HERBAL-@item.Id?');">Hủy</button>
+                                                </div>
+                                            </form>
+
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <form action="/Admin/Dashboard/DeleteBooking" method="post" class="d-inline ms-1">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Xóa vĩnh viễn" onclick="return confirm('CẢNH BÁO: Xóa vĩnh viễn đơn này khỏi cơ sở dữ liệu?');">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. THANH PHÂN TRANG (PAGINATION) -->
+            @if (totalPages > 1)
+            {
+                <div class="p-4 bg-light border-top">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link rounded-start-pill px-3" href="/Admin/Dashboard/Index?page=@(currentPage - 1)&search=@ViewBag.CurrentSearch&status=@ViewBag.CurrentStatus&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate">Trang trước</a>
+                            </li>
+
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link px-3" href="/Admin/Dashboard/Index?page=@i&search=@ViewBag.CurrentSearch&status=@ViewBag.CurrentStatus&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link rounded-end-pill px-3" href="/Admin/Dashboard/Index?page=@(currentPage + 1)&search=@ViewBag.CurrentSearch&status=@ViewBag.CurrentStatus&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate">Trang sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- HỆ THỐNG MODAL ĐIỀU PHỐI TÀI NGUYÊN (CHỐNG LỖI 405 BẰNG URL TUYỆT ĐỐI) -->
+<!-- ================================================================= -->
+@if (Model != null && Model.Any())
+{
+    @foreach (var item in Model)
+    {
+        <div class="modal fade" id="assignModal-@item.Id" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow-lg text-start">
+                    <form action="/Admin/Dashboard/AssignResource" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="bookingId" value="@item.Id" />
+                        
+                        <!-- TRUYỀN GIÁ TRỊ ROWVERSION PHỤC VỤ CHỐNG XUNG ĐỘT ĐỒNG THỜI -->
+                        @if (item.RowVersion != null)
+                        {
+                            <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(item.RowVersion)" />
+                        }
+
+                        <div class="modal-header bg-success text-white px-4 py-3 rounded-top-4">
+                            <h5 class="modal-title fw-bold"><i class="bi bi-person-workspace me-2"></i> Điều Phối Tài Nguyên #HERBAL-@item.Id</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body p-4">
+                            <div class="alert alert-light border mb-4 py-2 px-3 rounded-3 small">
+                                <span class="fw-bold text-success">Khách hàng:</span> @item.CustomerName |
+                                <span class="fw-bold text-success">Số khách:</span> @item.NumberOfGuests người |
+                                <span class="fw-bold text-success">Thời gian:</span> @item.BookingDate.ToString("dd/MM/yyyy") (@item.BookingTime.ToString(@"hh\:mm"))
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success small">Chọn Kỹ Thuật Viên Phụ Trách:</label>
+                                <select name="therapistId" class="form-select form-select-lg rounded-3 fs-6">
+                                    <option value="0">-- Chưa phân công KTV --</option>
+                                    @foreach (var t in therapists)
+                                    {
+                                        <option value="@t.Id" selected="@(item.TherapistId == t.Id)">@t.Name (@t.Specialty)</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success small">Chọn Giường / Phòng Trị Liệu:</label>
+                                <select name="bedId" class="form-select form-select-lg rounded-3 fs-6">
+                                    <option value="0">-- Chưa xếp giường --</option>
+                                    @foreach (var b in beds)
+                                    {
+                                        <option value="@b.Id" selected="@(item.BedId == b.Id)">@b.BedNumber - @b.RoomName (@b.FloorLevel) @(b.IsOccupied ? "[Đang bận]" : "[Trống]")</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success small">Cập Nhật Trạng Thái Đơn Hàng:</label>
+                                <select name="status" class="form-select form-select-lg rounded-3 fs-6">
+                                    <option value="Chờ xác nhận" selected="@(item.Status == "Chờ xác nhận")">Chờ xác nhận</option>
+                                    <option value="Đã cọc" selected="@(item.Status == "Đã cọc")">Đã cọc</option>
+                                    <option value="Hoàn thành" selected="@(item.Status == "Hoàn thành")">Hoàn thành</option>
+                                    <option value="Đã hủy" selected="@(item.Status == "Đã hủy")">Đã hủy</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-0 bg-light px-4 py-3 rounded-bottom-4">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-success-custom rounded-pill px-5 fw-bold shadow-sm">Lưu Phân Công</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}

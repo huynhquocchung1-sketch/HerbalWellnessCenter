@@ -1,0 +1,350 @@
+﻿@{
+    ViewData["Title"] = "Trang Chủ - Herbal Wellness Center";
+}
+
+<!-- Style Tùy Chỉnh Chuyên Nghiệp -->
+<style>
+    :root {
+        --primary-green: #2d5a27;
+        --accent-gold: #c5a059;
+        --bg-cream: #fbf9f5;
+        --text-dark: #2c3e50;
+    }
+
+    /* Banner Chính Tràn Viền */
+    .hero-banner-full {
+        background: linear-gradient(rgba(15, 32, 18, 0.65), rgba(15, 32, 18, 0.65)), url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1600') center/cover no-repeat;
+        min-height: 80vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        margin-bottom: 3rem;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .hero-title {
+        font-size: 3.2rem;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        color: #ffffff;
+    }
+
+    .hero-slogan {
+        font-size: 1.4rem;
+        color: var(--accent-gold);
+        font-style: italic;
+        font-weight: 300;
+    }
+
+    .btn-gold {
+        background-color: var(--accent-gold);
+        color: #fff !important;
+        border: none;
+        padding: 12px 36px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4);
+    }
+
+        .btn-gold:hover {
+            background-color: #b08d4b;
+            transform: translateY(-2px);
+        }
+
+    /* Tiêu Đề Các Phân Khu */
+    .section-title-container {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-subtitle {
+        color: var(--accent-gold);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 2px;
+        font-size: 0.85rem;
+    }
+
+    .section-main-title {
+        color: var(--primary-green);
+        font-weight: 800;
+        font-size: 2.2rem;
+    }
+
+    /* Đồng Bộ 4 Card Không Gian */
+    .space-card {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        transition: all 0.35s ease;
+        background: #ffffff;
+    }
+
+        .space-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(45, 90, 39, 0.15) !important;
+        }
+
+    .space-img-wrapper {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+        .space-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .space-card:hover .space-img-wrapper img {
+        transform: scale(1.08);
+    }
+
+    .badge-area {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(45, 90, 39, 0.9);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Form Đặt Lịch Chuyên Nghiệp */
+    .booking-wrapper {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(197, 160, 89, 0.25);
+        overflow: hidden;
+    }
+
+    .booking-header {
+        background: var(--primary-green);
+        color: white;
+        padding: 28px;
+        text-align: center;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 0.25rem rgba(45, 90, 39, 0.15);
+        }
+
+    .stat-banner {
+        background-color: var(--primary-green);
+        color: white;
+        border-radius: 20px;
+        padding: 35px 20px;
+    }
+</style>
+
+<!-- THÔNG BÁO TỪ TEMP DATA -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm text-center fw-bold rounded-3" role="alert">
+            🌿 @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="container mt-3">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm text-center fw-bold rounded-3" role="alert">
+            ⚠️ @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+}
+
+<!-- 1. HERO BANNER TRÀN VIỀN -->
+<div class="hero-banner-full">
+    <div class="container">
+        <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm">🌿 TRUNG TÂM DƯỠNG SINH CỔ TRUYỀN</span>
+        <h1 class="hero-title mb-2">HERBAL WELLNESS CENTER</h1>
+        <p class="hero-slogan mb-4">"Cân bằng thân – Tịnh tâm trí – Sống an nhiên"</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="#booking-section" class="btn btn-gold btn-lg">ĐẶT LỊCH HẸN NGAY</a>
+            <a href="#about-section" class="btn btn-outline-light btn-lg rounded-pill px-4">KHÁM PHÁ KHÔNG GIAN</a>
+        </div>
+    </div>
+</div>
+
+<!-- 2. GIỚI THIỆU TRIẾT LÝ & QUY MÔ -->
+<section id="about-section" class="container my-5 py-3">
+    <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+            <div class="position-relative">
+                <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800" class="img-fluid rounded-4 shadow-lg" alt="Spa Interior" />
+                <div class="position-absolute bottom-0 start-0 bg-white p-3 m-3 rounded-3 shadow border-start border-4 border-success">
+                    <p class="mb-0 fw-bold text-success">Mô hình Dưỡng sinh 1 Trệt + 1 Lầu</p>
+                    <small class="text-muted">Sức chứa phục vụ: 15 – 25 khách/lượt</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <span class="section-subtitle">Triết lý trị liệu</span>
+            <h2 class="section-main-title mb-3">Nature heals from within</h2>
+            <p class="text-muted mb-4">
+                Sở hữu không gian kiến trúc hòa hợp với thiên nhiên cùng mô hình trị liệu Đông y dưỡng sinh chuyên sâu. Chúng tôi mang lại giải pháp chăm sóc sức khỏe toàn diện cho Thân - Tâm - Trí với đội ngũ lương y và kỹ thuật viên tận tâm.
+            </p>
+            <div class="row g-3">
+                <div class="col-6"><span class="fs-5 me-2">🌱</span><strong>Thảo dược 100% tự nhiên</strong></div>
+                <div class="col-6"><span class="fs-5 me-2">👨‍⚕️</span><strong>Lương y tay nghề cao</strong></div>
+                <div class="col-6"><span class="fs-5 me-2">🪵</span><strong>Bồn gỗ & Đá tự nhiên</strong></div>
+                <div class="col-6"><span class="fs-5 me-2">🍵</span><strong>Thưởng trà dưỡng sinh</strong></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. KHÁM PHÁ 4 KHÔNG GIAN CHÍNH (ĐỒNG BỘ NẾT CẢ 4 CARD) -->
+<section id="spaces-section" class="container my-5 py-3">
+    <div class="section-title-container">
+        <span class="section-subtitle">Phân khu chức năng</span>
+        <h2 class="section-main-title">4 KHÔNG GIAN CHÍNH</h2>
+    </div>
+
+    <div class="row g-4">
+        <!-- Space 1: Đông y -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card space-card shadow-sm h-100">
+                <div class="space-img-wrapper">
+                    <span class="badge-area">Tầng 1 - 35 m²</span>
+                    <img src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=600" alt="Đông y Thảo dược" />
+                </div>
+                <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="fw-bold text-success mb-2">🌿 Đông y – Thảo dược</h5>
+                        <p class="text-muted small mb-3">Bắt mạch tư vấn, ngâm tắm thảo mộc bồn gỗ, xông hơi trị liệu cổ truyền giúp lưu thông khí huyết.</p>
+                    </div>
+                    <a href="#booking-section" class="btn btn-sm btn-outline-success rounded-pill px-3 align-self-center">Đặt gói này</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Space 2: Spa Massage -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card space-card shadow-sm h-100">
+                <div class="space-img-wrapper">
+                    <span class="badge-area">Tầng 1 - 25 m²</span>
+                    <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600" alt="Spa Massage" />
+                </div>
+                <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="fw-bold text-success mb-2">💆 Spa – Massage</h5>
+                        <p class="text-muted small mb-3">Massage trị liệu đau mỏi cổ vai gáy, xoa bóp bấm huyệt chuyên sâu giải tỏa căng thẳng toàn thân.</p>
+                    </div>
+                    <a href="#booking-section" class="btn btn-sm btn-outline-success rounded-pill px-3 align-self-center">Đặt gói này</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Space 3: Beauty -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card space-card shadow-sm h-100">
+                <div class="space-img-wrapper">
+                    <span class="badge-area">Tầng 1 - 30 m²</span>
+                    <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=600" alt="Beauty" />
+                </div>
+                <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="fw-bold text-success mb-2">✨ Beauty</h5>
+                        <p class="text-muted small mb-3">Chăm sóc da mặt chuyên sâu, gội đầu dưỡng sinh bằng các nguyên liệu thảo mộc tự nhiên.</p>
+                    </div>
+                    <a href="#booking-section" class="btn btn-sm btn-outline-success rounded-pill px-3 align-self-center">Đặt gói này</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Space 4: Wellness -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card space-card shadow-sm h-100">
+                <div class="space-img-wrapper">
+                    <span class="badge-area">Tầng 2 - 45 m²</span>
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=600" alt="Wellness" />
+                </div>
+                <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="fw-bold text-success mb-2">🧘 Wellness – Thư giãn</h5>
+                        <p class="text-muted small mb-3">Không gian tĩnh tâm, thiền định, trị liệu chuông xoay Tây Tạng phục hồi năng lượng tâm trí.</p>
+                    </div>
+                    <a href="#booking-section" class="btn btn-sm btn-outline-success rounded-pill px-3 align-self-center">Đặt gói này</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- 5. FORM ĐẶT LỊCH HẸN TRỰC TUYẾN (SMART BOOKING) -->
+<section id="booking-section" class="container my-5 py-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="booking-wrapper">
+                <div class="booking-header">
+                    <h3 class="fw-bold mb-1">ĐẶT LỊCH TRỊ LIỆU DƯỠNG SINH</h3>
+                    <p class="mb-0 text-white-50">Lễ tân sẽ liên hệ xác nhận trong vòng 15 phút (Giới hạn 15–25 khách/lượt)</p>
+                </div>
+
+                <form asp-controller="Home" asp-action="BookAppointment" method="post" class="p-4 p-md-5">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Họ và Tên <span class="text-danger">*</span></label>
+                            <input type="text" name="CustomerName" class="form-control" placeholder="Nguyễn Văn A" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Điện Thoại <span class="text-danger">*</span></label>
+                            <input type="tel" name="PhoneNumber" class="form-control" placeholder="090x xxx xxx" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Chọn Không Gian Trải Nghiệm <span class="text-danger">*</span></label>
+                            <select name="ServiceCategory" class="form-select" required>
+                                <option value="">-- Chọn không gian --</option>
+                                <option value="Đông y">🌿 Đông y – Thảo dược</option>
+                                <option value="Spa">💆 Spa – Massage</option>
+                                <option value="Beauty">✨ Beauty</option>
+                                <option value="Wellness">🧘 Wellness – Thư giãn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Ngày Hẹn <span class="text-danger">*</span></label>
+                            <input type="date" name="BookingDate" class="form-control" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Số Lượng Khách <span class="text-danger">*</span></label>
+                            <input type="number" name="NumberOfGuests" class="form-control" min="1" max="10" value="1" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Ghi Chú Hoặc Yêu Cầu Tùy Chỉnh</label>
+                            <textarea name="Note" class="form-control" rows="2" placeholder="Ví dụ: Cần KTV nữ, ưu tiên phòng yên tĩnh..."></textarea>
+                        </div>
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-gold btn-lg px-5 shadow">XÁC NHẬN ĐẶT LỊCH NGAY</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

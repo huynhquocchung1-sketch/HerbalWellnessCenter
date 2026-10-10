@@ -1,0 +1,419 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Herbal Wellness Center</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts (Playfair Display & Plus Jakarta Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-green: #1e3a1b;
+            --light-green: #2d5a27;
+            --accent-gold: #c5a059;
+            --accent-gold-hover: #a8833e;
+            --bg-cream: #fbf9f5;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+        }
+
+        body {
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-green);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-bar a {
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .top-bar a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Sticky Glassmorphism Header */
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand-herbal {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+            color: var(--primary-green) !important;
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link-herbal {
+            color: var(--text-dark) !important;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link-herbal:hover {
+            color: var(--primary-green) !important;
+        }
+
+        .nav-link-herbal::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--accent-gold);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link-herbal:hover::after {
+            width: 70%;
+        }
+
+        /* CTA Booking Button */
+        .btn-gold-cta {
+            background-color: var(--accent-gold);
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border-radius: 50px;
+            padding: 10px 24px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gold-cta:hover {
+            background-color: var(--accent-gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(197, 160, 89, 0.5);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background-color: #142a12;
+            color: #d1d5db;
+        }
+
+        .footer-title {
+            color: var(--accent-gold);
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 35px;
+            height: 2px;
+            background-color: var(--accent-gold);
+        }
+
+        .footer-link {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .footer-link:hover {
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        /* Floating Contact Widget */
+        .floating-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 25px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.4rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            color: white;
+        }
+
+        .btn-zalo { background-color: #0068ff; }
+        .btn-phone { background-color: #25d366; }
+        .btn-top { background-color: var(--primary-green); display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. TOP INFORMATION BAR -->
+    <div class="top-bar d-none d-md-block">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-4">
+                <span><i class="bi bi-clock-fill text-warning me-2"></i> Mở cửa: 08:30 - 21:00 (Hàng ngày)</span>
+                <span><i class="bi bi-geo-alt-fill text-warning me-2"></i> Ký túc xá ĐHQG-HCM, TP. Thủ Đức</span>
+                <span><i class="bi bi-telephone-fill text-warning me-2"></i> Hotline: 090x xxx xxx</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="fst-italic text-warning">"Nature heals from within"</span>
+                <div class="vr bg-light opacity-25"></div>
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. STICKY MAIN NAVIGATION BAR -->
+    <header class="header-sticky">
+        <nav class="navbar navbar-expand-lg py-3">
+            <div class="container">
+                <a class="navbar-brand navbar-brand-herbal d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <span class="fs-2">🌿</span>
+                    <span>HERBAL WELLNESS</span>
+                </a>
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-herbal" asp-controller="Home" asp-action="Index">Trang Chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-herbal" href="/#about-section">Giới Thiệu</a>
+                        </li>
+
+                        <!-- Dropdown 4 Không Gian -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-herbal dropdown-toggle" href="/#spaces-section" role="button" data-bs-toggle="dropdown">
+                                4 Không Gian
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-lg rounded-3">
+                                <li><a class="dropdown-item py-2" href="/#spaces-section">🌿 Đông y – Thảo dược</a></li>
+                                <li><a class="dropdown-item py-2" href="/#spaces-section">💆 Spa – Massage</a></li>
+                                <li><a class="dropdown-item py-2" href="/#spaces-section">✨ Beauty</a></li>
+                                <li><a class="dropdown-item py-2" href="/#spaces-section">🧘 Wellness – Thư giãn</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-herbal" href="/#booking-section">Bảng Giá & Đặt Lịch</a>
+                        </li>
+
+                        <!-- LIÊN KẾT LỊCH HẸN CÁ NHÂN KHI ĐÃ ĐĂNG NHẬP -->
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-herbal text-success fw-bold" asp-controller="Customer" asp-action="MyBookings">
+                                    <i class="bi bi-calendar-heart me-1"></i> Lịch Hẹn Của Tôi
+                                </a>
+                            </li>
+                        }
+
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-herbal" href="#footer-section">Liên Hệ</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- GIỮ NGUYÊN TẤT CẢ CÁC MENU KHÁC TRÊN NAVBAR -->
+
+<!-- CÁC NÚT TÁC VỤ QUẢN LÝ DÀNH CHO ADMIN / STAFF -->
+@if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+{
+    <a class="btn btn-outline-success btn-sm fw-bold px-3 py-2 rounded-pill shadow-sm" asp-area="Admin" asp-controller="Dashboard" asp-action="Beds">
+        <i class="bi bi-hospital me-1"></i> Quản Lý Giường
+    </a>
+    <a class="btn btn-outline-success btn-sm fw-bold px-3 py-2 rounded-pill shadow-sm" asp-area="Admin" asp-controller="Dashboard" asp-action="Therapists">
+        <i class="bi bi-person-badge me-1"></i> Quản Lý KTV
+    </a>
+}
+<!-- GIỮ NGUYÊN CÁC PHẦN DƯỚI CỦA FILE _LAYOUT.CSHTML -->
+                        <!-- NÚT QUẢN TRỊ LỄ TÂN (HIỆN NỔI BẬT KHI LÀ ADMIN/STAFF) -->
+                        @if (User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Staff")))
+                        {
+                            <a class="btn btn-warning btn-sm text-dark fw-bold px-3 py-2 rounded-pill shadow-sm" asp-area="Admin" asp-controller="Dashboard" asp-action="Index" title="Quản trị Lễ tân">
+                                <i class="bi bi-speedometer2 me-1"></i> Quản Trị Lễ Tân
+                            </a>
+                        }
+
+                        <a href="/#booking-section" class="btn btn-gold-cta shadow">
+                            <i class="bi bi-calendar-check me-1"></i> ĐẶT LỊCH HẸN
+                        </a>
+
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 3. MAIN CONTENT BODY -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- 4. FLOATING CONTACT WIDGET -->
+    <div class="floating-widget">
+        <a href="https://zalo.me" target="_blank" class="floating-btn btn-zalo" title="Chat Zalo">
+            <i class="bi bi-chat-fill"></i>
+        </a>
+        <a href="tel:090x xxx xxx" class="floating-btn btn-phone" title="Gọi Ngay">
+            <i class="bi bi-telephone-fill"></i>
+        </a>
+        <a href="#" id="backToTop" class="floating-btn btn-top" title="Về đầu trang">
+            <i class="bi bi-arrow-up-short"></i>
+        </a>
+    </div>
+
+    <!-- 5. FOOTER -->
+    <footer id="footer-section" class="pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4 pb-4">
+                <!-- Col 1: Thương hiệu & Quy mô -->
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-white font-serif fw-bold mb-3">🌿 HERBAL WELLNESS CENTER</h4>
+                    <p class="small text-light mb-3">
+                        Trung tâm dưỡng sinh cổ truyền hàng đầu, mang đến giải pháp phục hồi sức khỏe toàn diện Thân - Tâm - Trí trong không gian kiến trúc tự nhiên.
+                    </p>
+                    <div class="bg-black bg-opacity-25 p-3 rounded-3 border border-secondary border-opacity-25">
+                        <small class="text-warning d-block fw-bold mb-1">THÔNG TIN QUY MÔ DỰ ÁN</small>
+                        <small class="d-block text-white-50">• Diện tích đất: 300 - 500 m²</small>
+                        <small class="d-block text-white-50">• Quy mô: 1 Trệt + 1 Lầu</small>
+                        <small class="d-block text-white-50">• Sức chứa: 15 - 25 khách/lượt</small>
+                    </div>
+                </div>
+
+                <!-- Col 2: Liên kết nhanh -->
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title">DANH MỤC</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Home" asp-action="Index" class="footer-link">Trang chủ</a></li>
+                        <li><a href="/#about-section" class="footer-link">Giới thiệu triết lý</a></li>
+                        <li><a href="/#spaces-section" class="footer-link">4 Phân khu chính</a></li>
+                        <li><a href="/#booking-section" class="footer-link">Đặt lịch hẹn</a></li>
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li><a asp-controller="Customer" asp-action="MyBookings" class="footer-link">Lịch hẹn của tôi</a></li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Col 3: Dịch vụ nổi bật -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-title">DỊCH VỤ NỔI BẬT</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/#spaces-section" class="footer-link">🌿 Đông y – Thảo dược (Ngâm tắm bồn gỗ)</a></li>
+                        <li><a href="/#spaces-section" class="footer-link">💆 Spa – Massage (Bấm huyệt cổ vai gáy)</a></li>
+                        <li><a href="/#spaces-section" class="footer-link">✨ Beauty (Gội đầu dưỡng sinh thảo mộc)</a></li>
+                        <li><a href="/#spaces-section" class="footer-link">🧘 Wellness (Thiền định & Chuông xoay)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Liên hệ & Giờ làm việc -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-title">LIÊN HỆ</h5>
+                    <p class="small text-light mb-2"><i class="bi bi-geo-alt text-warning me-2"></i>Ký túc xá ĐHQG-HCM, TP. Hồ Chí Minh</p>
+                    <p class="small text-light mb-2"><i class="bi bi-telephone text-warning me-2"></i>Hotline: 090x xxx xxx</p>
+                    <p class="small text-light mb-2"><i class="bi bi-envelope text-warning me-2"></i>info@herbalwellness.com</p>
+                    <p class="small text-light mb-0"><i class="bi bi-clock text-warning me-2"></i>08:30 - 21:00 (Thứ 2 - Chủ Nhật)</p>
+                </div>
+            </div>
+
+            <hr class="border-secondary opacity-25 my-3" />
+
+            <div class="row align-items-center text-center text-md-start small text-white-50">
+                <div class="col-md-6">
+                    &copy; 2026 Herbal Wellness Center. Tất cả quyền được bảo lưu.
+                </div>
+                <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                    <a href="#" class="text-white-50 text-decoration-none me-3">Chính sách bảo mật</a>
+                    <a href="#" class="text-white-50 text-decoration-none">Điều khoản dịch vụ</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Back To Top Button Logic
+        $(window).scroll(function () {
+            if ($(this).scrollTop() > 300) {
+                $('#backToTop').fadeIn();
+            } else {
+                $('#backToTop').fadeOut();
+            }
+        });
+
+        $('#backToTop').click(function (e) {
+            e.preventDefault();
+            $('html, body').animate({ scrollTop: 0 }, '300');
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

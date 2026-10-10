@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Không tìm thấy trang - 404";
+}
+
+<div class="container text-center py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg rounded-4 p-5 bg-white">
+                <div class="display-1 fw-bold text-success mb-3">404</div>
+                <h2 class="fw-bold text-dark mb-3">Không Tìm Thấy Trang</h2>
+                <p class="text-muted mb-4">
+                    @(ViewBag.ErrorMessage ?? "Đường dẫn bạn truy cập không tồn tại trên hệ thống Herbal Wellness Center.")
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="/" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-house-door-fill me-2"></i> Về Trang Chủ
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi bi-arrow-left me-2"></i> Quay Lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
