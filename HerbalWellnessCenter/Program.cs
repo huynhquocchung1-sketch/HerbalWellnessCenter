@@ -5,6 +5,7 @@ using HerbalWellnessCenter.Middlewares; // Thêm namespace chứa RequestLogging
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // =========================================================================
