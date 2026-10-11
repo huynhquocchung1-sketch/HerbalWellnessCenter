@@ -1,10 +1,10 @@
 using HerbalWellnessCenter.Data;
 using HerbalWellnessCenter.Models;
 using HerbalWellnessCenter.Services;
-using HerbalWellnessCenter.Middlewares; // Thêm namespace chứa RequestLoggingMiddleware
+using HerbalWellnessCenter.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.DataProtection; // Thêm namespace cho DataProtection
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorCodesToAdd: null);
     }));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // =========================================================================
@@ -67,10 +68,14 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 // =========================================================================
-// 5. CẤU HÌNH MVC CONTROLLERS & RAZOR PAGES
+// 5. CẤU HÌNH MVC CONTROLLERS, RAZOR PAGES & DATA PROTECTION
 // =========================================================================
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// Cấu hình định danh DataProtection để chuẩn hóa quản lý khóa mã hóa trên Cloud Container
+builder.Services.AddDataProtection()
+    .SetApplicationName("HerbalWellnessCenter");
 
 var app = builder.Build();
 
@@ -97,7 +102,6 @@ app.UseStaticFiles();
 // KÍCH HOẠT CUSTOM MIDDLEWARE GIÁM SÁT HIỆU NĂNG & AUDIT LOG
 // =========================================================================
 app.UseMiddleware<RequestLoggingMiddleware>();
-
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
