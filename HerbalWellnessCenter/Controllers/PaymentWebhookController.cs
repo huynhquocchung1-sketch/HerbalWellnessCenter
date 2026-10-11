@@ -16,7 +16,7 @@ namespace HerbalWellnessCenter.Controllers.Api
         private readonly ApplicationDbContext _context;
         private readonly ILogger<PaymentWebhookController> _logger;
 
-        // Token bảo mật nội bộ (Có thể cấu hình trong appsettings.json)
+        // Token bảo mật nội bộ (Có thể cấu hình trong appsettings.json nếu cần thiết)
         private const string SecretWebhookToken = "HerbalWellness_SecuredKey_2026";
 
         public PaymentWebhookController(ApplicationDbContext context, ILogger<PaymentWebhookController> logger)
@@ -29,7 +29,7 @@ namespace HerbalWellnessCenter.Controllers.Api
         /// API Endpoint nhận Webhook biến động số dư từ cổng thanh toán VietQR / SePay / Casso
         /// </summary>
         [HttpPost("vietqr")]
-        public async Task<IActionResult> ReceiveVietQRWebhook([FromBody] SePayWebhookPayload payload)
+        public async Task<IActionResult> ReceiveVietQRWebhook([FromBody] SePayWebhookPayload? payload)
         {
             try
             {
@@ -40,10 +40,10 @@ namespace HerbalWellnessCenter.Controllers.Api
                     return BadRequest(new { success = false, message = "Payload không hợp lệ." });
                 }
 
-                // 2. Kiểm tra chiều giao dịch (Chỉ xử lý tiền vào: "in" hoặc số tiền > 0)
-                if (payload.transferAmount <= 0 || (payload.transferType != null && payload.transferType.ToLower() == "out"))
+                // 2. Kiểm tra chiều giao dịch (Chỉ xử lý tiền vào: số tiền > 0 và không phải giao dịch chuyển đi "out")
+                if (payload.transferAmount <= 0 || (payload.transferType != null && payload.transferType.Equals("out", StringComparison.OrdinalIgnoreCase)))
                 {
-                    _logger.LogInformation("Bỏ qua giao dịch tiền ra hoặc số tiền <= 0. ID giao dịch: {Id}", payload.id);
+                    _logger.LogInformation("Bỏ qua giao dịch chi tiền hoặc số tiền <= 0. ID giao dịch: {Id}", payload.id);
                     return Ok(new { success = true, message = "Đã bỏ qua giao dịch chi tiền." });
                 }
 
@@ -51,7 +51,7 @@ namespace HerbalWellnessCenter.Controllers.Api
                     payload.transferAmount, payload.content, payload.referenceNumber);
 
                 // 3. Chống trùng lặp giao dịch (Idempotency Check)
-                string transactionRef = payload.referenceNumber ?? payload.id.ToString();
+                string transactionRef = !string.IsNullOrEmpty(payload.referenceNumber) ? payload.referenceNumber : payload.id.ToString();
                 var existingBooking = await _context.Bookings
                     .FirstOrDefaultAsync(b => b.TransactionCode == transactionRef);
 
@@ -62,7 +62,6 @@ namespace HerbalWellnessCenter.Controllers.Api
                 }
 
                 // 4. Bóc tách Mã đơn hàng (Booking ID) từ nội dung chuyển khoản
-                // Hỗ trợ cú pháp: "DATLICH 15", "HERBAL-15", "DH15", v.v.
                 int bookingId = ExtractBookingId(payload.content);
 
                 if (bookingId <= 0)
@@ -82,18 +81,18 @@ namespace HerbalWellnessCenter.Controllers.Api
                     return Ok(new { success = false, message = $"Không tìm thấy đơn hàng #{bookingId}." });
                 }
 
-                // Kiểm tra nếu đơn đã cọc rồi
+                // Kiểm tra nếu đơn đã cọc hoặc thanh toán rồi
                 if (booking.PaymentStatus == "Đã cọc" || booking.PaymentStatus == "Đã thanh toán")
                 {
                     _logger.LogInformation("Đơn hàng #{BookingId} đã ở trạng thái thanh toán: {Status}", bookingId, booking.PaymentStatus);
                     return Ok(new { success = true, message = "Đơn hàng đã được thanh toán từ trước." });
                 }
 
-                // 6. Cập nhật trạng thái đơn hàng sang "Đã cọc"
+                // 6. Cập nhật trạng thái đơn hàng sang "Đã cọc" và xác nhận đơn
                 booking.PaymentStatus = "Đã cọc";
                 booking.DepositAmount = payload.transferAmount;
                 booking.TransactionCode = transactionRef;
-                booking.Status = "Đã xác nhận"; // Tự động chuyển trạng thái đơn sang Đã xác nhận khi tiền về
+                booking.Status = "Đã xác nhận";
                 booking.UpdatedAt = DateTime.Now;
 
                 _context.Bookings.Update(booking);
@@ -118,16 +117,15 @@ namespace HerbalWellnessCenter.Controllers.Api
         }
 
         /// <summary>
-        /// Hàm hỗ trợ bóc tách số ID đơn hàng từ chuỗi nội dung chuyển khoản
+        /// Hàm hỗ trợ bóc tách số ID đơn hàng từ chuỗi nội dung chuyển khoản an toàn với Nullable
         /// </summary>
-        private int ExtractBookingId(string content)
+        private int ExtractBookingId(string? content)
         {
             if (string.IsNullOrWhiteSpace(content)) return 0;
 
-            // Chuyển về chữ hoa để dễ quét từ khóa nếu cần
             string upperContent = content.ToUpper();
 
-            // Dùng Regex tìm chuỗi số nằm sau các từ khóa như DATLICH, HERBAL, DH, ID hoặc lấy cụm số đầu tiên
+            // Dùng Regex tìm chuỗi số nằm sau các từ khóa như DATLICH, HERBAL, DH, ID
             Match match = Regex.Match(upperContent, @"(?:DATLICH|HERBAL|DH|ID)?\s*#?(\d+)");
 
             if (match.Success && match.Groups[1].Success)
